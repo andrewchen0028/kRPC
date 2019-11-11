@@ -17,5 +17,6 @@ public class main {
         vessel.getControl().setThrottle(1);
         TimeUnit.SECONDS.sleep(5);
         vessel.getControl().activateNextStage();
+        System.out.println("yo");
         }
     }
