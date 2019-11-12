@@ -9,57 +9,73 @@ import krpc.client.services.SpaceCenter.*;
 import krpc.schema.KRPC.ProcedureCall;
 
 import java.io.IOException;
+import java.util.SortedMap;
+import java.util.concurrent.TimeUnit;
 
 
 public class main {
 
-    public static void main (String args[]) throws IOException, RPCException, StreamException {
-        /*
-        Connection connection = Connection.newInstance("connection", "10.192.30.138", 50000, 50001);
-         */
-        Connection connection = Connection.newInstance();
+    public static void main(String args[]) throws IOException, RPCException, StreamException, InterruptedException {
+
+        // Connection block
+        Connection connection = Connection.newInstance("connection", "10.192.17.144", 50000, 50001);
+        //Connection connection = Connection.newInstance();
+
+        // Initialize KRPC, SpaceCenter, and Vessel
         KRPC krpc = KRPC.newInstance(connection);
         SpaceCenter spaceCenter = SpaceCenter.newInstance(connection);
         Vessel vessel = spaceCenter.getActiveVessel();
 
-        float maxThrust = 0.95f*vessel.getMaxThrust();
-        Boolean launched;
+        // Ignition block
+        System.out.println("Ignition");
+        vessel.getControl().setThrottle(1);
+        vessel.getAutoPilot().targetPitchAndHeading(85, 90);
+        vessel.getAutoPilot().engage();
+        vessel.getControl().activateNextStage();
 
+        // Set thrust and staging markers
+        float liftoffThrust = 0.95f * vessel.getMaxThrust();
+        Boolean launched = false;
         ProcedureCall thrust = connection.getCall(vessel, "getThrust");
 
-        Expression fullThrust = Expression.greaterThan(
+        // Set liftoff flag
+        Expression liftoff = Expression.greaterThan(
                 connection,
                 Expression.call(connection, thrust),
-                Expression.constantFloat(connection, maxThrust));
+                Expression.constantFloat(connection, liftoffThrust));
+        Event liftoffFlag = krpc.addEvent(liftoff);
 
-        Expression zeroThrust = Expression.equal(
+        // Set separation flag
+        Expression separation = Expression.equal(
                 connection,
                 Expression.call(connection, thrust),
                 Expression.constantFloat(connection, 0f));
+        Event separationFlag = krpc.addEvent(separation);
 
-        System.out.println("Ignition");
-        vessel.getControl().setThrottle(1);
-        vessel.getControl().activateNextStage();
+        // Liftoff thread
+        synchronized (liftoffFlag.getCondition()) {
+            liftoffFlag.waitFor();
 
-        Event liftoff = krpc.addEvent(fullThrust);
-        Event separation = krpc.addEvent(zeroThrust);
+            System.out.println('3');
+            TimeUnit.SECONDS.sleep(1);
+            System.out.println('2');
+            TimeUnit.SECONDS.sleep(1);
+            System.out.println('1');
+            TimeUnit.SECONDS.sleep(1);
 
-        synchronized (liftoff.getCondition()) {
-            liftoff.waitFor();
             System.out.println("Liftoff");
             vessel.getControl().activateNextStage();
             launched = true;
         }
 
-        synchronized (separation.getCondition()) {
-            separation.waitFor();
-            if (launched) {
-                System.out.println("Separation");
-                vessel.getControl().activateNextStage();
-            }
-        }
-
-        System.out.println("Done");
-
+        // Separation thread
+        synchronized (separationFlag.getCondition()) {
+            separationFlag.waitFor();
+            System.out.println("Separation");
+            vessel.getControl().setForward(1f);
+            TimeUnit.MILLISECONDS.sleep(500);
+            vessel.getControl().activateNextStage();
+            vessel.getControl().setForward(0f);
         }
     }
+}
