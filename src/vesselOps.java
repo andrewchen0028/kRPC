@@ -1,6 +1,10 @@
+import krpc.client.services.SpaceCenter;
+
 import java.util.concurrent.TimeUnit;
 
-public class ops {
+import static krpc.client.services.SpaceCenter.*;
+
+public class vesselOps {
 
     public static void countdown(int t) throws InterruptedException {
         while(t > 0) {
@@ -8,5 +12,9 @@ public class ops {
             TimeUnit.SECONDS.sleep(1);
             t--;
         }
+    }
+
+    public static void launch(Vessel vessel, float ap) {
+
     }
 }

@@ -1,15 +1,10 @@
 import krpc.client.Connection;
 import krpc.client.RPCException;
-import krpc.client.Event;
-import krpc.client.StreamException;
 import krpc.client.services.KRPC;
-import krpc.client.services.KRPC.Expression;
 import krpc.client.services.SpaceCenter;
 import krpc.client.services.SpaceCenter.*;
-import krpc.schema.KRPC.ProcedureCall;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 public class main {
 
@@ -22,12 +17,11 @@ public class main {
         // Initialize KRPC, SpaceCenter, and Vessel
         KRPC krpc = KRPC.newInstance(connection);
         SpaceCenter spaceCenter = SpaceCenter.newInstance(connection);
-        Vessel vessel = spaceCenter.getActiveVessel();
+        Vessel Falcon1 = spaceCenter.getActiveVessel();
 
-        ops.launch(vessel, 10000);
+        vesselOps.launch(Falcon1, 1000);
         System.out.println("yeet");
         connection.close();
     }
 
 }
-
