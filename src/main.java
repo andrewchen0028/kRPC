@@ -9,7 +9,6 @@ import krpc.client.services.SpaceCenter.*;
 import krpc.schema.KRPC.ProcedureCall;
 
 import java.io.IOException;
-import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
 
@@ -18,7 +17,7 @@ public class main {
     public static void main(String args[]) throws IOException, RPCException, StreamException, InterruptedException {
 
         // Connection block
-        Connection connection = Connection.newInstance("connection", "10.192.17.144", 50000, 50001);
+        Connection connection = Connection.newInstance("connection", "10.192.23.55", 50000, 50001);
         //Connection connection = Connection.newInstance();
 
         // Initialize KRPC, SpaceCenter, and Vessel
@@ -35,7 +34,6 @@ public class main {
 
         // Set thrust and staging markers
         float liftoffThrust = 0.95f * vessel.getMaxThrust();
-        Boolean launched = false;
         ProcedureCall thrust = connection.getCall(vessel, "getThrust");
 
         // Set liftoff flag
@@ -54,18 +52,15 @@ public class main {
 
         // Liftoff thread
         synchronized (liftoffFlag.getCondition()) {
-            liftoffFlag.waitFor();
-
+            separationFlag.waitFor();
             System.out.println('3');
             TimeUnit.SECONDS.sleep(1);
             System.out.println('2');
             TimeUnit.SECONDS.sleep(1);
             System.out.println('1');
             TimeUnit.SECONDS.sleep(1);
-
             System.out.println("Liftoff");
             vessel.getControl().activateNextStage();
-            launched = true;
         }
 
         // Separation thread
