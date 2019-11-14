@@ -25,9 +25,9 @@ public class main {
         SpaceCenter spaceCenter = SpaceCenter.newInstance(connection);
         Vessel Falcon1 = spaceCenter.getActiveVessel();
 
-        Operations.launch(Falcon1);
-        Operations.holdAltitude(Falcon1, 1000);
+        Operations.launch(Falcon1, 10, 6);
         connection.close();
+
     }
 
 }
