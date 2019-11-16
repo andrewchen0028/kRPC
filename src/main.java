@@ -1,3 +1,4 @@
+import javafx.scene.control.OverrunStyle;
 import krpc.client.Connection;
 import krpc.client.RPCException;
 import krpc.client.services.KRPC;
@@ -13,12 +14,14 @@ public class main {
     public static void main(String args[]) throws IOException, RPCException, InterruptedException {
 
         // Connection block
-        Connection connection = Connection.newInstance(
+        /*Connection connection = Connection.newInstance(
                 "connection",
                 "10.192.25.151",
                 50000,
                 50001);
-        //Connection connection = Connection.newInstance();
+
+         */
+        Connection connection = Connection.newInstance();
 
         // Initialize KRPC, SpaceCenter, and Vessel
         KRPC krpc = KRPC.newInstance(connection);
@@ -26,6 +29,23 @@ public class main {
         Vessel Falcon1 = spaceCenter.getActiveVessel();
 
         Operations.launch(Falcon1, 10, 6);
+
+        Falcon1.getAutoPilot().engage();
+        Falcon1.getAutoPilot().setTargetHeading(90);
+        float targetPitch = 90;
+
+        while (Falcon1.flight(Falcon1.getReferenceFrame()).getSpeed() < 50) {
+            TimeUnit.MILLISECONDS.sleep(100);
+            System.out.println("Velocity: " + Falcon1.flight(Falcon1.getReferenceFrame()).getSpeed());
+        }
+
+        while (Falcon1.getThrust() != 0) {
+            System.out.println("Target pitch: " + targetPitch);
+            Falcon1.getAutoPilot().setTargetPitch(targetPitch);
+            targetPitch -= 0.05;
+            TimeUnit.MILLISECONDS.sleep(100);
+        }
+
         connection.close();
 
     }
