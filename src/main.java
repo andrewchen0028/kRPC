@@ -19,13 +19,9 @@ public class main {
         // Initialize KRPC, SpaceCenter, and Vessel
         KRPC krpc = KRPC.newInstance(connection);
         SpaceCenter spaceCenter = SpaceCenter.newInstance(connection);
-        Vessel Falcon9 = spaceCenter.getActiveVessel();
+        Vessel vessel = spaceCenter.getActiveVessel();
 
-        for (Part part : Falcon9.getParts().inDecoupleStage(4)) {
-            part.setHighlighted(true);
-        }
-
-        TimeUnit.SECONDS.sleep(5);
+        System.out.println(Operations.getActivePropellants(vessel).toString());;
 
         connection.close();
     }

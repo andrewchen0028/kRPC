@@ -63,4 +63,14 @@ public class Operations {
 
     public static void circularize(Vessel vessel, double targetRadius) throws RPCException {
     }
+
+    public static ArrayList<String> getActivePropellants(Vessel vessel) throws RPCException {
+        ArrayList<String> activePropellants = new ArrayList<>();
+        for (Engine engine : vessel.getParts().getEngines()) {
+            if (engine.getActive() && !activePropellants.contains(engine.getPropellantNames().toString())) {
+                activePropellants.add(engine.getPropellantNames().toString());
+            }
+        }
+        return activePropellants;
+    }
 }
