@@ -73,4 +73,12 @@ public class Operations {
         }
         return activePropellants;
     }
+
+    public static int countStages(Vessel vessel) throws RPCException {
+        int stages = 0;
+        while (!vessel.getParts().inStage(stages).isEmpty()) {
+            stages++;
+        }
+        return stages;
+    }
 }
