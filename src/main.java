@@ -19,13 +19,13 @@ public class main {
     public static void main(String args[]) throws IOException, RPCException, InterruptedException {
 
         // Connection block
-        //Connection connection = Connection.newInstance();
+        Connection connection = Connection.newInstance();
 
-        Connection connection = Connection.newInstance(
+/*        Connection connection = Connection.newInstance(
                 "connection",
                 "192.168.43.105",
                 50000,
-                50001);
+                50001);*/
 
         // Initialize KRPC, SpaceCenter, and Vessel
         KRPC krpc = KRPC.newInstance(connection);
@@ -49,7 +49,8 @@ public class main {
         }
         Operations.stage(vessel);
 
-        int stage = Operations.countDecoupleStages(vessel);
+        int stage = Operations.countDecoupleStages(vessel) - 1;
+        System.out.println("Stages: " + stage);
 
         double UT0 = spaceCenter.getUT();
         while (vessel.resourcesInDecoupleStage(stage, false).amount(fuel) != 0
