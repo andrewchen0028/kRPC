@@ -19,13 +19,13 @@ public class main {
     public static void main(String args[]) throws IOException, RPCException, InterruptedException {
 
         // Connection block
-        Connection connection = Connection.newInstance();
+//        Connection connection = Connection.newInstance();
 
-/*        Connection connection = Connection.newInstance(
+        Connection connection = Connection.newInstance(
                 "connection",
-                "192.168.43.105",
+                "10.192.24.90",
                 50000,
-                50001);*/
+                50001);
 
         // Initialize KRPC, SpaceCenter, and Vessel
         KRPC krpc = KRPC.newInstance(connection);
@@ -34,34 +34,34 @@ public class main {
 
         float pitch = 90;
         float heading = 90;
-        float throttle = 1;
-        long dt = 10;
+        double UT0 = spaceCenter.getUT();
         String fuel = "Kerosene";
         String oxidizer = "LqdOxygen";
 
         vessel.getAutoPilot().targetPitchAndHeading(pitch, heading);
         vessel.getAutoPilot().engage();
-        vessel.getControl().setThrottle(throttle);
+        vessel.getControl().setThrottle(1);
 
         Operations.stage(vessel); // ignition
         while (vessel.getThrust() < 0.95 * vessel.getMaxThrust()) {
-            TimeUnit.MILLISECONDS.sleep(dt);
+            TimeUnit.MILLISECONDS.sleep(10);
         }
         Operations.stage(vessel);
 
-        int stage = Operations.countDecoupleStages(vessel) - 1;
-        System.out.println("Stages: " + stage);
+        System.out.println("Stages: " + Operations.countStages(vessel));
+        System.out.println("Dstages: " + Operations.countDecoupleStages(vessel));
 
-        double UT0 = spaceCenter.getUT();
-        while (vessel.resourcesInDecoupleStage(stage, false).amount(fuel) != 0
-                && vessel.resourcesInDecoupleStage(stage, false).amount(oxidizer) != 0) {
+        int stage = Operations.countDecoupleStages(vessel);
+
+        while (vessel.resourcesInDecoupleStage(stage - 1, false).amount(fuel) > 1
+                && vessel.resourcesInDecoupleStage(stage - 1, false).amount(oxidizer) >1) {
             pitch = 90 - (float) (spaceCenter.getUT() - UT0) * 0.4f;
             vessel.getAutoPilot().targetPitchAndHeading(pitch, heading);
             System.out.printf(
-                    "MET: %-6.2f   Pitch: %-4.1f   Fuel: %-6f   Oxidizer: %-6f\n",
-                    spaceCenter.getUT() - UT0, pitch,
-                    vessel.resourcesInDecoupleStage(stage, false).amount(fuel),
-                    vessel.resourcesInDecoupleStage(stage, false).amount(oxidizer));
+                    "MET: %6.1f   Pitch: %4.1f   Fuel: %6.0f   Oxidizer: %6.0f\n",
+                    (float)(spaceCenter.getUT() - UT0), pitch,
+                    vessel.resourcesInDecoupleStage(stage - 1, false).amount(fuel),
+                    vessel.resourcesInDecoupleStage(stage - 1, false).amount(oxidizer));
         }
         Operations.stage(vessel, stage);
 
