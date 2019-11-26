@@ -81,4 +81,17 @@ public class Operations {
         }
         return stages;
     }
+
+    public static int countDecoupleStages(Vessel vessel) throws RPCException {
+        int decoupleStages = 0;
+        while(!vessel.getParts().inDecoupleStage(decoupleStages).isEmpty()) {
+            decoupleStages++;
+        }
+        return decoupleStages;
+    }
+
+    public static void stage(Vessel vessel, int stages) throws RPCException {
+        vessel.getControl().activateNextStage();
+        stages--;
+    }
 }
