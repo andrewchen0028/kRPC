@@ -19,13 +19,13 @@ public class main {
     public static void main(String args[]) throws IOException, RPCException, InterruptedException {
 
         // Connection block
-//        Connection connection = Connection.newInstance();
+        Connection connection = Connection.newInstance();
 
-        Connection connection = Connection.newInstance(
+/*        Connection connection = Connection.newInstance(
                 "connection",
                 "10.192.24.90",
                 50000,
-                50001);
+                50001);*/
 
         // Initialize KRPC, SpaceCenter, and Vessel
         KRPC krpc = KRPC.newInstance(connection);
@@ -37,6 +37,7 @@ public class main {
         double UT0 = spaceCenter.getUT();
         String fuel = "Kerosene";
         String oxidizer = "LqdOxygen";
+        double[] constants = {110, 70, 0.125, -1.5}; // steering constants
 
         vessel.getAutoPilot().targetPitchAndHeading(pitch, heading);
         vessel.getAutoPilot().engage();
@@ -55,13 +56,12 @@ public class main {
 
         while (vessel.resourcesInDecoupleStage(stage - 1, false).amount(fuel) > 1
                 && vessel.resourcesInDecoupleStage(stage - 1, false).amount(oxidizer) >1) {
-            pitch = 90 - (float) (spaceCenter.getUT() - UT0) * 0.4f;
+
+            pitch = (float) (constants[0] - constants[1] * Math.tanh(constants[2]
+                    * (vessel.flight(vessel.getReferenceFrame()).getMeanAltitude()/1000 - constants[3])));
+
             vessel.getAutoPilot().targetPitchAndHeading(pitch, heading);
-            System.out.printf(
-                    "MET: %6.1f   Pitch: %4.1f   Fuel: %6.0f   Oxidizer: %6.0f\n",
-                    (float)(spaceCenter.getUT() - UT0), pitch,
-                    vessel.resourcesInDecoupleStage(stage - 1, false).amount(fuel),
-                    vessel.resourcesInDecoupleStage(stage - 1, false).amount(oxidizer));
+            System.out.printf("Pitch: %6.3f\n", pitch);
         }
         Operations.stage(vessel, stage);
 
